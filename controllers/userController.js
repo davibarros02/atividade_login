@@ -37,7 +37,8 @@ exports.postCadastro = async ( req, res ) => {
     const canCreateAdmin = req.canCreateAdmin;
 
     if (isAdmin && !canCreateAdmin) {
-        return res.status(403).json({ message: 'Apenas o power user pode criar administradores' });
+        req.flash('error', 'Apenas o power user pode criar administradores.');
+        return res.redirect('/cadastro');
     }
 
     const UserType = isAdmin && canCreateAdmin ? SuperUser : SimpleUser;
@@ -45,14 +46,16 @@ exports.postCadastro = async ( req, res ) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     
     try {
-        const user = await UserType.create({
+        await UserType.create({
             name,
             email,
             password: hashedPassword
         });
     } catch (error) {
-        return res.status(500).json({ message: `Erro ao criar usuário: ${error.message}` });
+        req.flash('error', `Erro ao criar usuario: ${error.message}`);
+        return res.redirect('/cadastro');
     }
 
+    req.flash('success', 'Usuario criado com sucesso.');
     res.redirect('/');
 };

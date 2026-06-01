@@ -1,6 +1,7 @@
 require('dotenv').config();
 
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 const sequelize = require('../database');
 const User = require('../models/userModel');
@@ -15,21 +16,27 @@ exports.postLogin = async (req, res) => {
     const user = await User.findOne({ where: { email }});
     
     if (!user) {
-        return res.status(400).json({ message: 'Usuário não encontrado' });
+        req.flash('error', 'Usuario nao encontrado.');
+        return res.redirect('/');
     }
 
     const validPassword = await bcrypt.compare(password, user.password);
 
     if (!validPassword) {
-        return res.status(400).json({ message: 'Senha inválida' });
+        req.flash('error', 'Senha invalida.');
+        return res.redirect('/');
     }
 
-    req.session.user = {
+    const sessionUser = {
+        id: user.id,
         name: user.name,
         email: user.email,
         userType: user.userType,
         isPowerUser: user.isPowerUser
     };
+
+    req.session.user = sessionUser;
+    req.session.authToken = jwt.sign(sessionUser, process.env.JWT_SECRET, { expiresIn: '1h' });
 
     res.redirect('/dashboard');
 };

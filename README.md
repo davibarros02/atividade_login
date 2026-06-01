@@ -4,11 +4,14 @@ Aplicacao web simples em Node.js, Express, EJS, Sequelize e PostgreSQL para evol
 
 ## Status atual
 
-O projeto possui autenticação basica, cadastro de usuarios, separacao entre usuario comum e administrador, power user inicial e dashboards diferentes por perfil.
+O projeto possui autenticacao basica com sessao e JWT, cadastro de usuarios, separacao entre usuario comum e administrador, power user inicial e dashboards diferentes por perfil.
+
+Funcionalidades concluidas:
+
+- US01: exibicao de vagas disponiveis, porcentagem de ocupacao e edicao administrativa da capacidade.
 
 Funcionalidades em andamento:
 
-- US01: exibicao de vagas disponiveis e porcentagem de ocupacao.
 - US05: cadastro de usuarios com diferenciacao entre usuario comum, administrador e power user.
 
 Funcionalidades ainda nao iniciadas:
@@ -39,10 +42,20 @@ DB_USER="postgres"
 DB_HOST="localhost"
 DB_PASSWORD="..."
 SESSION_SECRET="..."
+JWT_SECRET="..."
 POWER_USER_PASSWORD="..."
 PORT=3000
 ESTACIONAMENTO_CAPACIDADE_TOTAL=150
 ```
+
+`JWT_SECRET` assina as credenciais mantidas na sessao.
+
+## Autenticacao e mensagens
+
+- O login cria uma sessao Express e armazena um JWT assinado em `req.session.authToken`.
+- Rotas autenticadas usam `authMiddleware`, que exige JWT valido.
+- Rotas que precisam apenas saber o perfil usam `adminStatusMiddleware`, que calcula privilegios sem bloquear acesso publico.
+- Mensagens de erro e sucesso usam `connect-flash` e o partial `views/partials/flashMessages.ejs`.
 
 ## Rotas principais
 
@@ -51,7 +64,16 @@ ESTACIONAMENTO_CAPACIDADE_TOTAL=150
 - `POST /cadastro`: cria usuario comum ou, se a sessao for do power user, administrador.
 - `POST /login`: autentica e redireciona para `/dashboard`.
 - `GET /dashboard`: renderiza o dashboard correto conforme o perfil da sessao.
+- `POST /dashboard/capacidade`: altera a capacidade total de vagas, apenas para administradores.
 - `POST /logout`: encerra a sessao.
+
+## Front-end
+
+Arquivos JavaScript de interacao das views ficam em `public/` e sao servidos pelo Express como arquivos estaticos.
+
+## Testes
+
+`npm test` executa `scripts/test.js`, que valida a sintaxe dos arquivos JavaScript principais e renderiza as views EJS com dados minimos.
 
 ## Observacao de desenvolvimento
 

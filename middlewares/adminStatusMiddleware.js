@@ -1,6 +1,15 @@
+const {
+    getAuthenticatedSessionUser
+} = require('./sessionAuth');
+
+
 module.exports = (req, res, next) => {
-    req.isAdmin = req.session.user && req.session.user.userType === 'super';
-    req.isPowerUser = req.session.user && req.session.user.isPowerUser;
+    // Status administrativo opcional: define privilegios sem bloquear rotas publicas.
+    const authenticatedUser = getAuthenticatedSessionUser(req);
+
+    req.session.user = authenticatedUser;
+    req.isAdmin = Boolean(authenticatedUser && authenticatedUser.userType === 'super');
+    req.isPowerUser = Boolean(authenticatedUser && authenticatedUser.isPowerUser);
     req.canCreateAdmin = req.isPowerUser;
 
     next();

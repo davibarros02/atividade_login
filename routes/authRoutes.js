@@ -15,6 +15,7 @@ router.get('/dashboard', authMiddleware, adminStatusMiddleware, dashController.g
 router.post('/login', authController.postLogin);
 router.post('/logout', authController.postLogout);
 router.post('/cadastro', adminStatusMiddleware, userController.postCadastro);
+router.post('/dashboard/capacidade', authMiddleware, adminStatusMiddleware, dashController.postCapacidade);
 router.post('/register', authController.postRegister);
 
 router.initializeSystem = authController.initializeSystem;
