@@ -17,7 +17,7 @@
                             <%- include('partials/flashMessages') %>
 
                             <!-- Formulário de Entrada -->
-                            <form action="/veiculos/registro/entrada" method="POST" class="mb-5">
+                            <form action="/veiculos/registro/entrada" method="POST" class="mb-5" id="entradaForm" data-mensalistas="<%= JSON.stringify(mensalistasPlacas || []) %>">
                                 <h5 class="card-subtitle mb-3 text-muted">Registrar Entrada</h5>
                                 <div class="row g-3 align-items-end">
                                     <div class="col-md-3">
@@ -43,6 +43,7 @@
                                         <select class="form-select" id="tipoPagamento" name="tipoPagamento" required>
                                             <option value="pospago" selected>Pós-pago (Na Saída)</option>
                                             <option value="prepago">Pré-pago (Na Entrada)</option>
+                                            <option value="mensalista">Mensalista</option>
                                         </select>
                                     </div>
                                     <div class="col-md-3">
@@ -124,5 +125,6 @@
                 </div>
             </div>
         </div>
+        <script src="/veiculoRegistro.js"></script>
     </body>
 </html>

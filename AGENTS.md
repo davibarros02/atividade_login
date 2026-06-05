@@ -42,7 +42,7 @@ Estas praticas devem orientar as proximas features deste projeto.
 - `User` e o model Sequelize base. A flag `isPowerUser` foi descontinuada.
 - Os perfis são definidos estritamente na coluna `userType` com os valores:
   - `'super'`: Super User, acessa o dashboard de usuário com atalho exclusivo para criar novos operadores (`'simple'`).
-  - `'simple'`: Simple User (operador), gerencia entrada/saída de veículos, vagas, tíquetes e devedores.
+  - `'simple'`: Simple User (operador), gerencia entrada/saída de veículos, vagas, tíquetes, devedores e mensalistas.
 - O super user inicial continua garantido durante a inicializacao.
 - `isAdmin` deriva de `userType === 'simple'`.
 - `canCreateAdmin` deriva de `userType === 'super'`.
@@ -75,5 +75,4 @@ Estas praticas devem orientar as proximas features deste projeto.
 - US03 concluida: controle e consumo de tíquetes com geração de código alfanumérico único (`TK-XXXXXX`), suporte a pagamento pré-pago e pós-pago, precificação diferenciada por tipo de veículo (carro/moto), validação/impedimento de reentrada de devedores, fluxo de saída indevida, tela de histórico de tíquetes, tela de lista de devedores com quitação de débito e campos de auditoria (`criadoPorId`, `validadoPorId`).
 - US06 concluida: configuração dinâmica de vagas e tarifas do estacionamento (capacidade de carros/motos, valores dos tíquetes de carros/motos) no banco de dados via `/dashboard/config`, restrito ao Super User (`'super'`).
 - US04 concluida: relatórios de faturamento, fluxo de veículos e histórico geral exibidos na rota protegida `/relatorios` para o Super User, incluindo gráficos interativos (Chart.js), filtros rápidos de período (`hoje`, `7dias`, `30dias`, `3meses`, `6meses`, `12meses`, `3anos`, `todos`) com agrupamento dinâmico de faturamento (hora, dia, semana, mês, ano) e barra de busca por placa no histórico.
-
-
+- US07 concluida: pacote mensal (mensalista) com modelos `Mensalista` e `MensalistaPagamento`, rota `/mensalistas` restrita a operadores (`'simple'`), registro e renovação de planos com validade dinâmica baseada nos dias do mês corrente, valores padrão baseados em 22 dias úteis (R$88 carro, R$44 moto), configuração de tarifas de mensalidade pelo Super User em `/dashboard/config`, validação de plano ativo no check-in de veículos, pré-seleção automática via script client-side em `public/veiculoRegistro.js` e cartão de métricas de mensalistas nos relatórios.

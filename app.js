@@ -9,13 +9,14 @@ const dashboardRoutes = require('./routes/dashboardRoutes');
 const veiculoRoutes = require('./routes/veiculoRoutes');
 const tiqueteRoutes = require('./routes/tiqueteRoutes');
 const relatorioRoutes = require('./routes/relatorioRoutes');
+const mensalistaRoutes = require('./routes/mensalistaRoutes');
 
 const app = express();
 
 app.set('view engine', 'ejs');
 
 app.use(express.urlencoded({ extended: true }));
-
+app.use(express.static('public'));
 
 app.use(session({
     secret: process.env.SESSION_SECRET,
@@ -37,6 +38,7 @@ app.use('/dashboard', dashboardRoutes);
 app.use('/veiculos', veiculoRoutes);
 app.use('/tiquetes', tiqueteRoutes);
 app.use('/relatorios', relatorioRoutes);
+app.use('/mensalistas', mensalistaRoutes);
 
 
 authRoutes.initializeSystem().then(() => {

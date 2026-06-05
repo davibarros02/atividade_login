@@ -31,5 +31,15 @@ module.exports = sequelize.define('Estacionamento', {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false,
         defaultValue: Number(process.env.TIQUETE_VALOR_MOTO || 2.00)
+    },
+    valorMensalidadeCarro: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: false,
+        defaultValue: Number(process.env.MENSALISTA_VALOR_CARRO || 88.00)
+    },
+    valorMensalidadeMoto: {
+        type: DataTypes.DECIMAL(10, 2),
+        allowNull: false,
+        defaultValue: Number(process.env.MENSALISTA_VALOR_MOTO || 44.00)
     }
 });

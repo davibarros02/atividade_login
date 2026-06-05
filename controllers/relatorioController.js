@@ -2,6 +2,7 @@ const { Op } = require('sequelize');
 const Registro = require('../models/registroModel');
 const Tiquete = require('../models/tiqueteModel');
 const User = require('../models/userModel');
+const MensalistaPagamento = require('../models/mensalistaPagamentoModel');
 
 const getStartOfWeek = (d) => {
     const date = new Date(d);
@@ -216,6 +217,45 @@ exports.getRelatorios = async (req, res) => {
             }
         });
 
+        // Mensalista payments query
+        const wherePagamento = {};
+        if (startDate) {
+            wherePagamento.createdAt = {
+                [Op.between]: [startDate, endDate]
+            };
+        } else {
+            wherePagamento.createdAt = {
+                [Op.lte]: endDate
+            };
+        }
+
+        const pagamentosMensalistas = await MensalistaPagamento.findAll({
+            where: wherePagamento
+        });
+
+        let faturamentoMensalistas = 0;
+        pagamentosMensalistas.forEach(p => {
+            faturamentoMensalistas += Number(p.valor || 0);
+        });
+
+        // Concluded mensalista exits query
+        const whereRegistroMensalista = {
+            status: 'concluido',
+            tipoPagamento: 'mensalista'
+        };
+        if (startDate) {
+            whereRegistroMensalista.horarioSaida = {
+                [Op.between]: [startDate, endDate]
+            };
+        } else {
+            whereRegistroMensalista.horarioSaida = {
+                [Op.lte]: endDate
+            };
+        }
+        const totalSaidasMensalistas = await Registro.count({
+            where: whereRegistroMensalista
+        });
+
         const chartFaturamento = getFaturamentoChartData(tiquetesPagos, periodo);
 
         // Filtrar histórico pela placa (se especificado)
@@ -236,6 +276,8 @@ exports.getRelatorios = async (req, res) => {
             totalDevedoresAtivos,
             totalCarrosCount,
             totalMotosCount,
+            faturamentoMensalistas,
+            totalSaidasMensalistas,
             chartFaturamento,
             historicoTiquetes,
             canCreateAdmin: req.canCreateAdmin

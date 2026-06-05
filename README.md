@@ -4,7 +4,7 @@ Aplicacao web simples em Node.js, Express, EJS, Sequelize e PostgreSQL para evol
 
 ## Status atual
 
-O projeto possui autenticação básica com sessão e JWT, cadastro de operadores restrito a Super Users, configuração dinâmica de capacidades e tarifas por veículo, controle de ocupação e capacidade em tempo real, painel para entrada e saída de veículos com validação de placas, e controle e consumo de tíquetes (devedores/pagamentos).
+O projeto possui autenticação básica com sessão e JWT, cadastro de operadores restrito a Super Users, configuração dinâmica de capacidades e tarifas por veículo, controle de ocupação e capacidade em tempo real, painel para entrada e saída de veículos com validação de placas, controle e consumo de tíquetes (devedores/pagamentos) e gestão de pacotes mensais (mensalistas).
 
 Funcionalidades concluídas:
 
@@ -14,6 +14,7 @@ Funcionalidades concluídas:
 - US04: página de relatórios e faturamento `/relatorios` restrita a Super Users com gráficos de barras/roscas interativos e filtros temporais dinâmicos.
 - US05: cadastro de operadores (`'simple'`) restrito ao Super User (`'super'`).
 - US06: painel de configurações gerais (`/dashboard/config`) para o Super User editar dinamicamente capacidades de vagas (carros/motos) e tarifas de cobrança, salvas e carregadas em banco de dados.
+- US07: pacote mensal (mensalista) com registro e renovação de planos por placa, validade dinâmica baseada no mês corrente, configuração de tarifas pelo Super User, validação de plano ativo no check-in e métricas nos relatórios.
 
 Funcionalidades em andamento:
 
@@ -30,7 +31,7 @@ Funcionalidades ainda não iniciadas:
 Os perfis de usuário são definidos pela coluna única `userType`:
 
 - `'super'`: Super User, acessa o dashboard contendo atalho exclusivo para criar novos operadores (`'simple'`).
-- `'simple'`: Simple User (operador), acessa o dashboard administrativo para gerenciar entrada/saída de veículos, tíquetes e devedores.
+- `'simple'`: Simple User (operador), acessa o dashboard administrativo para gerenciar entrada/saída de veículos, tíquetes, devedores e mensalistas.
 
 O Super User é garantido no início da aplicação (`sequelize.sync({ force: true })`):
 
@@ -56,10 +57,12 @@ ESTACIONAMENTO_CAPACIDADE_CARROS=150
 ESTACIONAMENTO_CAPACIDADE_MOTOS=20
 TIQUETE_VALOR_CARRO=4.00
 TIQUETE_VALOR_MOTO=2.00
+MENSALISTA_VALOR_CARRO=88.00
+MENSALISTA_VALOR_MOTO=44.00
 ```
 
 > [!NOTE]
-> As variáveis `ESTACIONAMENTO_CAPACIDADE_*` e `TIQUETE_VALOR_*` são usadas apenas como valores padrão (seed) ao inicializar/criar a tabela `Estacionamentos` no banco de dados. Após a criação, esses valores são lidos e modificados dinamicamente no banco de dados por meio da tela de configurações.
+> As variáveis `ESTACIONAMENTO_CAPACIDADE_*`, `TIQUETE_VALOR_*` e `MENSALISTA_VALOR_*` são usadas apenas como valores padrão (seed) ao inicializar/criar a tabela `Estacionamentos` no banco de dados. Após a criação, esses valores são lidos e modificados dinamicamente no banco de dados por meio da tela de configurações. Os valores padrão das mensalidades consideram um mês útil de 22 dias (R$4×22 = R$88 para carros, R$2×22 = R$44 para motos).
 
 `JWT_SECRET` assina as credenciais mantidas na sessao.
 
@@ -88,8 +91,11 @@ TIQUETE_VALOR_MOTO=2.00
 - `GET /tiquetes`: lista e histórico de todos os tíquetes emitidos.
 - `GET /tiquetes/devedores`: lista de veículos devedores com débito pendente.
 - `POST /tiquetes/pagar/:id`: liquida a dívida de um tíquete (quitação/pagamento).
+- `GET /mensalistas`: painel de gerenciamento de pacotes mensais com listagem de planos ativos/expirados (apenas operadores).
+- `POST /mensalistas/pagamento`: registra ou renova o pagamento de um plano mensal para uma placa (apenas operadores).
 
 No dashboard do Super User, há atalhos para cadastrar novos operadores e acessar a página de configurações.
+No dashboard do operador, há atalho para gerenciar mensalistas.
 
 ## Testes
 

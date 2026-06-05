@@ -11,17 +11,21 @@ const javascriptFiles = [
     'routes/veiculoRoutes.js',
     'routes/tiqueteRoutes.js',
     'routes/relatorioRoutes.js',
+    'routes/mensalistaRoutes.js',
     'controllers/authController.js',
     'controllers/dashController.js',
     'controllers/userController.js',
     'controllers/veiculoController.js',
     'controllers/tiqueteController.js',
     'controllers/relatorioController.js',
+    'controllers/mensalistaController.js',
     'middlewares/auth.js',
     'models/estacionamentoModel.js',
     'models/userModel.js',
     'models/registroModel.js',
-    'models/tiqueteModel.js'
+    'models/tiqueteModel.js',
+    'models/mensalistaModel.js',
+    'models/mensalistaPagamentoModel.js'
 ];
 
 const viewTests = [
@@ -56,6 +60,7 @@ const viewTests = [
                     }
                 }
             ],
+            mensalistasPlacas: ['MEN1234'],
             errorMessages: [],
             successMessages: []
         }
@@ -192,6 +197,8 @@ const viewTests = [
             totalDevedoresAtivos: 1,
             totalCarrosCount: 8,
             totalMotosCount: 4,
+            faturamentoMensalistas: 120.00,
+            totalSaidasMensalistas: 2,
             chartFaturamento: {
                 labels: ['01/06', '02/06', '03/06', '04/06', '05/06', '06/06', '07/06'],
                 data: [10, 20, 15, 30, 10, 5, 10]
@@ -214,6 +221,22 @@ const viewTests = [
                     ValidadoPor: {
                         name: 'Admin Validador'
                     }
+                }
+            ],
+            canCreateAdmin: true,
+            errorMessages: [],
+            successMessages: []
+        }
+    },
+    {
+        file: 'views/mensalistas.ejs',
+        data: {
+            mensalistas: [
+                {
+                    placa: 'MEN1234',
+                    tipoVeiculo: 'carro',
+                    validade: new Date(),
+                    ativo: true
                 }
             ],
             canCreateAdmin: true,

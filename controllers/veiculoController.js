@@ -1,6 +1,8 @@
+const { Op } = require('sequelize');
 const Registro = require('../models/registroModel');
 const Estacionamento = require('../models/estacionamentoModel');
 const Tiquete = require('../models/tiqueteModel');
+const Mensalista = require('../models/mensalistaModel');
 
 const PLACA_REGEX = /^[A-Z]{3}-?[0-9][A-Z0-9][0-9]{2}$/i;
 
@@ -21,8 +23,14 @@ exports.getVeiculosRegistro = async (req, res) => {
             include: [{ model: Tiquete }]
         });
 
+        const activeMensalistas = await Mensalista.findAll({
+            where: { validade: { [Op.gte]: new Date() } }
+        });
+        const mensalistasPlacas = activeMensalistas.map(m => m.placa);
+
         res.render('veiculosRegistro', {
             registrosAtivos,
+            mensalistasPlacas,
             canCreateAdmin: req.canCreateAdmin
         });
     } catch (error) {
@@ -100,14 +108,35 @@ exports.postEntrada = async (req, res) => {
             return res.redirect('/veiculos/registro');
         }
 
+        if (tipoPagamento === 'mensalista') {
+            const activePlan = await Mensalista.findOne({
+                where: {
+                    placa,
+                    validade: { [Op.gte]: new Date() }
+                }
+            });
+
+            if (!activePlan) {
+                req.flash('error', 'Veículo não possui plano mensal ativo ou plano expirado.');
+                return res.redirect('/veiculos/registro');
+            }
+
+            if (activePlan.tipoVeiculo !== tipoVeiculo) {
+                req.flash('error', `Tipo de veículo (${tipoVeiculo === 'moto' ? 'Moto' : 'Carro'}) não corresponde ao plano mensalista cadastrado (${activePlan.tipoVeiculo === 'moto' ? 'Moto' : 'Carro'}).`);
+                return res.redirect('/veiculos/registro');
+            }
+        }
+
         // Criar registro e tíquete
         const registro = await Registro.create({
             placa,
             tipoVeiculo,
-            status: 'ativo'
+            status: 'ativo',
+            tipoPagamento
         });
 
         const isPrepago = tipoPagamento === 'prepago';
+        const isMensalista = tipoPagamento === 'mensalista';
         let codigoUnico = gerarCodigoTiquete();
 
         // Garantir unicidade do código
@@ -117,17 +146,17 @@ exports.postEntrada = async (req, res) => {
             codigoExiste = await Tiquete.findOne({ where: { codigo: codigoUnico } });
         }
 
-        const valorTiquete = isMoto
-            ? Number(estacionamento.valorTiqueteMoto)
-            : Number(estacionamento.valorTiqueteCarro);
+        const valorTiquete = isMensalista
+            ? 0.00
+            : (isMoto ? Number(estacionamento.valorTiqueteMoto) : Number(estacionamento.valorTiqueteCarro));
 
         await Tiquete.create({
             codigo: codigoUnico,
             valor: valorTiquete,
-            status: isPrepago ? 'pago' : 'pendente',
+            status: (isPrepago || isMensalista) ? 'pago' : 'pendente',
             registroId: registro.id,
             criadoPorId: req.user.id,
-            validadoPorId: isPrepago ? req.user.id : null
+            validadoPorId: (isPrepago || isMensalista) ? req.user.id : null
         });
 
         if (isMoto) {

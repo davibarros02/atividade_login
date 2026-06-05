@@ -10,7 +10,9 @@ const getDadosEstacionamento = async () => {
             capacidadeCarros: Number(process.env.ESTACIONAMENTO_CAPACIDADE_CARROS || 150),
             capacidadeMotos: Number(process.env.ESTACIONAMENTO_CAPACIDADE_MOTOS || 20),
             valorTiqueteCarro: Number(process.env.TIQUETE_VALOR_CARRO || 4.00),
-            valorTiqueteMoto: Number(process.env.TIQUETE_VALOR_MOTO || 2.00)
+            valorTiqueteMoto: Number(process.env.TIQUETE_VALOR_MOTO || 2.00),
+            valorMensalidadeCarro: Number(process.env.MENSALISTA_VALOR_CARRO || 88.00),
+            valorMensalidadeMoto: Number(process.env.MENSALISTA_VALOR_MOTO || 44.00)
         }
     });
 
@@ -62,7 +64,9 @@ exports.getConfigPage = async (req, res) => {
                 capacidadeCarros: Number(process.env.ESTACIONAMENTO_CAPACIDADE_CARROS || 150),
                 capacidadeMotos: Number(process.env.ESTACIONAMENTO_CAPACIDADE_MOTOS || 20),
                 valorTiqueteCarro: Number(process.env.TIQUETE_VALOR_CARRO || 4.00),
-                valorTiqueteMoto: Number(process.env.TIQUETE_VALOR_MOTO || 2.00)
+                valorTiqueteMoto: Number(process.env.TIQUETE_VALOR_MOTO || 2.00),
+                valorMensalidadeCarro: Number(process.env.MENSALISTA_VALOR_CARRO || 88.00),
+                valorMensalidadeMoto: Number(process.env.MENSALISTA_VALOR_MOTO || 44.00)
             }
         });
 
@@ -78,12 +82,14 @@ exports.getConfigPage = async (req, res) => {
 };
 
 exports.postConfig = async (req, res) => {
-    const { capacidadeCarros, capacidadeMotos, valorTiqueteCarro, valorTiqueteMoto } = req.body;
+    const { capacidadeCarros, capacidadeMotos, valorTiqueteCarro, valorTiqueteMoto, valorMensalidadeCarro, valorMensalidadeMoto } = req.body;
 
     const capCarros = Number(capacidadeCarros);
     const capMotos = Number(capacidadeMotos);
     const valCarro = Number(valorTiqueteCarro);
     const valMoto = Number(valorTiqueteMoto);
+    const valMensalidadeCarro = Number(valorMensalidadeCarro);
+    const valMensalidadeMoto = Number(valorMensalidadeMoto);
 
     try {
         const [estacionamento] = await Estacionamento.findOrCreate({
@@ -107,6 +113,12 @@ exports.postConfig = async (req, res) => {
             return res.redirect('/dashboard/config');
         }
 
+        if (isNaN(valMensalidadeCarro) || valMensalidadeCarro <= 0 ||
+            isNaN(valMensalidadeMoto) || valMensalidadeMoto <= 0) {
+            req.flash('error', 'Os valores das mensalidades devem ser números positivos maiores que zero.');
+            return res.redirect('/dashboard/config');
+        }
+
         if (capCarros < estacionamento.vagasOcupadasCarros) {
             req.flash('error', `A capacidade de carros não pode ser menor que o número de vagas ocupadas (${estacionamento.vagasOcupadasCarros}).`);
             return res.redirect('/dashboard/config');
@@ -121,7 +133,9 @@ exports.postConfig = async (req, res) => {
             capacidadeCarros: capCarros,
             capacidadeMotos: capMotos,
             valorTiqueteCarro: valCarro,
-            valorTiqueteMoto: valMoto
+            valorTiqueteMoto: valMoto,
+            valorMensalidadeCarro: valMensalidadeCarro,
+            valorMensalidadeMoto: valMensalidadeMoto
         });
 
         req.flash('success', 'Configurações de vagas e tarifas atualizadas com sucesso.');

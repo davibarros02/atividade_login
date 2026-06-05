@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+    <head>
+        <meta charset="UTF-8">
+        <title>Gerenciamento de Mensalistas</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    </head>
+    <body class="bg-light">
+        <div class="container mt-5">
+            <div class="row justify-content-center">
+                <div class="col-md-10">
+                    <div class="card shadow-sm mb-4">
+                        <div class="card-body">
+                            <h3 class="card-title mb-4">Gerenciamento de Mensalistas</h3>
+                            
+                            <%- include('partials/flashMessages') %>
+
+                            <!-- Formulário de Registro de Pagamento/Cadastro -->
+                            <form action="/mensalistas/pagamento" method="POST" class="mb-5">
+                                <h5 class="card-subtitle mb-3 text-muted">Registrar / Renovar Mensalidade</h5>
+                                <div class="row g-3 align-items-end">
+                                    <div class="col-md-5">
+                                        <label for="placa" class="form-label">Placa do Veículo:</label>
+                                        <input 
+                                            type="text" 
+                                            class="form-control text-uppercase" 
+                                            id="placa" 
+                                            name="placa" 
+                                            placeholder="Digite a placa (ex: AAA-1234)" 
+                                            required
+                                        >
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="tipoVeiculo" class="form-label">Tipo de Veículo:</label>
+                                        <select class="form-select" id="tipoVeiculo" name="tipoVeiculo" required>
+                                            <option value="carro" selected>Carro</option>
+                                            <option value="moto">Moto</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <button type="submit" class="btn btn-primary w-100">Registrar Pagamento</button>
+                                    </div>
+                                </div>
+                                <div class="form-text mt-2">
+                                    Nota: Registrar o pagamento estende ou cria o plano por 30 ou 31 dias dependendo do mês corrente do pagamento.
+                                </div>
+                            </form>
+
+                            <!-- Tabela de Mensalistas Cadastrados -->
+                            <h5 class="card-subtitle mb-3 text-muted">Lista de Mensalistas</h5>
+                            <% if (mensalistas.length === 0) { %>
+                                <div class="alert alert-info" role="alert">
+                                    Nenhum mensalista cadastrado até o momento.
+                                </div>
+                            <% } else { %>
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>Placa</th>
+                                                <th>Tipo</th>
+                                                <th>Validade</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <% mensalistas.forEach((m) => { %>
+                                                <tr>
+                                                    <td>
+                                                        <span class="badge bg-secondary fs-6"><%= m.placa %></span>
+                                                    </td>
+                                                    <td>
+                                                        <% if (m.tipoVeiculo === 'moto') { %>
+                                                            <span class="badge bg-warning text-dark text-capitalize">Moto</span>
+                                                        <% } else { %>
+                                                            <span class="badge bg-info text-dark text-capitalize">Carro</span>
+                                                        <% } %>
+                                                    </td>
+                                                    <td>
+                                                        <%= new Date(m.validade).toLocaleDateString('pt-BR') %>
+                                                    </td>
+                                                    <td>
+                                                        <% if (m.ativo) { %>
+                                                            <span class="badge bg-success">Ativo</span>
+                                                        <% } else { %>
+                                                            <span class="badge bg-danger">Expirado</span>
+                                                        <% } %>
+                                                    </td>
+                                                </tr>
+                                            <% }) %>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            <% } %>
+                        </div>
+                        <div class="card-footer bg-white py-3">
+                            <a href="/dashboard" class="btn btn-secondary">Voltar para o Dashboard</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
